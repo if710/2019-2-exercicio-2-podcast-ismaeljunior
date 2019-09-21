@@ -99,6 +99,7 @@ object Parser {
         var link: String? = null
         var pubDate: String? = null
         var description: String? = null
+        var enclosure: String? = null
         parser.require(XmlPullParser.START_TAG, null, "item")
         while (parser.next() != XmlPullParser.END_TAG) {
             if (parser.eventType != XmlPullParser.START_TAG) {
@@ -113,11 +114,22 @@ object Parser {
                 pubDate = readData(parser, "pubDate")
             } else if (name == "description") {
                 description = readData(parser, "description")
-            } else {
+            } else if (name == "enclosure") {
+                enclosure = readDownloadLink(parser, "enclosure")
+            }else {
                 skip(parser)
             }
         }
-        return ItemFeed(title!!, link!!, pubDate!!, description!!, "carregar o link")
+        return ItemFeed(title!!, link!!, pubDate!!, description!!, enclosure!!)
+    }
+
+    fun readDownloadLink(parser: XmlPullParser, tag: String): String {
+        var down_link = ""
+        parser.require(XmlPullParser.START_TAG, null, tag)
+        down_link = parser.getAttributeValue(null, "url")
+        parser.nextTag()
+        parser.require(XmlPullParser.END_TAG, null, tag)
+        return down_link
     }
 
     // Processa tags de forma parametrizada no feed.
